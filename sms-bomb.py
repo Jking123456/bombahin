@@ -349,7 +349,7 @@ class BombaNa:
             UI.progress(i, limit, provider.name, result)
             
             # Match original delay timing
-            await asyncio.sleep(random.uniform(2.0, 4.0))
+            await asyncio.sleep(1.0)
         
         print(f"\n{Colors.GREEN}{'─' * 70}{Colors.RESET}")
         

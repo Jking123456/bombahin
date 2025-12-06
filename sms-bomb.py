@@ -526,4 +526,34 @@ class BombaNa:
             print(f"\n{Colors.GREEN}{'─' * 70}{Colors.RESET}")
             continue_attack = UI.input_prompt("Launch another attack? (y/n)")
             if continue_attack.lower() != 'y':
-                UI.success("Returning to main menu...
+                UI.success("Returning to main menu...")
+                await asyncio.sleep(1)
+                return
+
+async def main():
+    try:
+        # Check and install dependencies
+        try:
+            import aiohttp
+        except ImportError:
+            print(f"{Colors.WHITE}Installing required dependencies...{Colors.RESET}")
+            import subprocess
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "aiohttp", "requests"])
+            print(f"{Colors.GREEN}Dependencies installed successfully!{Colors.RESET}")
+            await asyncio.sleep(2)
+        
+        # Start the application
+        app = BombaNa()
+        await app.start()
+        
+    except KeyboardInterrupt:
+        UI.clear()
+        print(f"\n{Colors.RED}{Colors.BOLD}Process terminated by user{Colors.RESET}\n")
+        sys.exit(0)
+    except Exception as e:
+        print(f"\n{Colors.RED}{Colors.BOLD}Fatal error: {e}{Colors.RESET}\n")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    asyncio.run(main())
+    

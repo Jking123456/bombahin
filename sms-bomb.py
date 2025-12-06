@@ -33,9 +33,9 @@ class UI:
 ██╔══██╗██║   ██║██║╚██╔╝██║██╔══██╗██╔══██║    ██║╚██╗██║██╔══██║
 ██████╔╝╚██████╔╝██║ ╚═╝ ██║██████╔╝██║  ██║    ██║ ╚████║██║  ██║
 ╚═════╝  ╚═════╝ ╚═╝     ╚═╝╚═════╝ ╚═╝  ╚═╝    ╚═╝  ╚═══╝╚═╝  ╚═╝
-                    {Colors.WHITE}by Homer Rebatis{Colors.RESET}
+                    {Colors.WHITE}by Bilyabits{Colors.RESET}
 {Colors.GREEN}{'═' * 70}{Colors.RESET}
-{Colors.WHITE}           Advanced Multi-Provider SEND OTP Tool{Colors.RESET}
+{Colors.WHITE}           Advanced Multi-Provider SMS Bomber Tool{Colors.RESET}
 {Colors.GREEN}{'═' * 70}{Colors.RESET}
 """
         print(banner)
